@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #000000;
+  --color-secondary: #ffffff;
+  --color-accent-blue: #0ea5e9;
+  --color-neon-purple: #c026d3;
+  --color-dark-surface: #111111;
+  --color-dark-card: #1a1a1a;
+  
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+}
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+  }
+  body {
+    @apply bg-white text-black dark:bg-[#050505] dark:text-white antialiased selection:bg-neon-purple selection:text-white transition-colors duration-300;
+  }
+}
