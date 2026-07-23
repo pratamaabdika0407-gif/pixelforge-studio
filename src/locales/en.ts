@@ -13,7 +13,7 @@ export const en = {
     lightMode: "Light Mode",
     darkMode: "Dark Mode"
   },
-  contact: {
+  contactInfo: {
     title: "Get in Touch",
     subtitle: "We'd love to hear from you. Reach out to us for any inquiries.",
     chatWa: "Chat on WhatsApp",

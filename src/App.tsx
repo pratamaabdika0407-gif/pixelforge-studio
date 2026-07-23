@@ -9,6 +9,7 @@ import Portfolio from "./pages/Portfolio";
 import Pricing from "./pages/Pricing";
 import Order from "./pages/Order";
 import AdminLogin from "./pages/AdminLogin";
+import AdminSetup from "./pages/AdminSetup";
 import AdminDashboard from "./pages/AdminDashboard";
 import MyOrders from "./pages/MyOrders";
 import Support from "./pages/Support";
@@ -238,6 +239,7 @@ export default function App() {
                 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/order" element={<Order />} />
                 <Route path="/admin" element={<AdminLogin />} />
+                <Route path="/setup" element={<AdminSetup />} />
                 <Route path="/admin/dashboard/*" element={<AdminDashboard />} />
                 <Route path="/my-orders" element={<MyOrders />} />
                 <Route path="/support" element={<Support />} />

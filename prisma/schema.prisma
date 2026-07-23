@@ -1,0 +1,150 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  STAFF
+}
+
+model Admin {
+  id           String   @id @default(uuid())
+  name         String
+  username     String   @unique
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(SUPER_ADMIN)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Order {
+  id           String   @id @default(uuid())
+  orderNo      String   @unique
+  serviceTitle String
+  priceIdr     Float
+  priceUsd     Float
+  status       String   @default("Menunggu Pembayaran")
+  clientName   String
+  email        String
+  phone        String
+  notes        String?
+  proofUrl     String?
+  progress     Int      @default(0)
+  history      Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model SupportTicket {
+  id        String   @id @default(uuid())
+  ticketNo  String   @unique
+  name      String
+  email     String
+  subject   String
+  message   String
+  status    String   @default("Menunggu")
+  response  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ChatSession {
+  id         String    @id @default(uuid())
+  sessionId  String    @unique
+  clientName String?
+  email      String?
+  status     String    @default("active")
+  messages   Message[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Message {
+  id            String      @id @default(uuid())
+  chatSessionId String
+  chatSession   ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
+  sender        String      // 'user', 'ai', 'admin'
+  text          String
+  showContact   Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+}
+
+model Quote {
+  id          String   @id @default(uuid())
+  quoteNo     String   @unique
+  requestJson Json
+  resultJson  Json
+  status      String   @default("Pending")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Consultation {
+  id             String   @id @default(uuid())
+  consultationNo String   @unique
+  name           String
+  email          String
+  whatsapp       String
+  business       String
+  country        String
+  language       String
+  webType        String
+  topic          String
+  desc           String
+  status         String   @default("Menunggu")
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Portfolio {
+  id        String   @id @default(uuid())
+  title     String
+  category  String
+  img       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Service {
+  id           String   @id @default(uuid())
+  title        String
+  desc         String
+  priceIdr     Float
+  priceUsd     Float
+  featuresJson Json
+  eta          String
+  img          String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Settings {
+  id    String @id @default(uuid())
+  key   String @unique
+  value String
+}

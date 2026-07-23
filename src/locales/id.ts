@@ -13,7 +13,7 @@ export const id = {
     lightMode: "Mode Terang",
     darkMode: "Mode Gelap"
   },
-  contact: {
+  contactInfo: {
     title: "Hubungi Kami",
     subtitle: "Kami siap mendengarkan. Hubungi kami untuk pertanyaan apa pun.",
     chatWa: "Chat via WhatsApp",
