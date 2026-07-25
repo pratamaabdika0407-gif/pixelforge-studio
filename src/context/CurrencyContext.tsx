@@ -58,11 +58,14 @@ export const CurrencyProvider = ({ children }: { children: React.ReactNode }) =>
   };
 
   const formatPrice = (priceIdr: number, priceUsd?: number) => {
+    const validIdr = typeof priceIdr === 'number' && !isNaN(priceIdr) ? priceIdr : 0;
+    const validRate = typeof exchangeRate === 'number' && exchangeRate > 0 ? exchangeRate : 15500;
     if (currency === 'IDR' || !usdEnabled) {
-      return `Rp ${priceIdr.toLocaleString('id-ID')}`;
+      return `Rp ${validIdr.toLocaleString('id-ID')}`;
     } else {
-      const finalUsd = autoCalculateUsd ? (priceIdr / exchangeRate) : (priceUsd || (priceIdr / exchangeRate));
-      return `$${finalUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      const finalUsd = autoCalculateUsd ? (validIdr / validRate) : (priceUsd || (validIdr / validRate));
+      const validUsd = typeof finalUsd === 'number' && !isNaN(finalUsd) ? finalUsd : 0;
+      return `$${validUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
   };
 

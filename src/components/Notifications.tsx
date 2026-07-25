@@ -29,7 +29,7 @@ export default function Notifications() {
   };
 
   return (
-    <div className="fixed top-24 right-6 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+    <div className="fixed top-24 right-6 z-[200] flex flex-col gap-2 max-w-sm w-full pointer-events-none">
       <AnimatePresence>
         {notifications.slice(0, 3).map((notif) => (
           <motion.div

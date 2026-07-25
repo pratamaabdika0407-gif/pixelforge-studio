@@ -108,7 +108,7 @@ export default function MyOrders() {
                     <p className="text-sm text-gray-500 mb-1">Total Harga</p>
                     <p className="font-bold text-neon-purple">
                       {order.currency === 'USD' ? '$' : 'Rp '} 
-                      {order.total?.toLocaleString(order.currency === 'USD' ? 'en-US' : 'id-ID')}
+                      {((order as any)?.total || 0).toLocaleString(order?.currency === 'USD' ? 'en-US' : 'id-ID')}
                     </p>
                   </div>
                   <div>

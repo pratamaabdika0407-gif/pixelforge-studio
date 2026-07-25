@@ -71,7 +71,7 @@ export default function LiveChat() {
 
   return (
     <>
-      <div className="fixed bottom-6 left-6 z-50">
+      <div className="fixed bottom-44 left-6 z-[110]">
         <button 
           onClick={() => setIsOpen(!isOpen)}
           className="w-14 h-14 bg-neon-purple text-white rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
@@ -86,7 +86,7 @@ export default function LiveChat() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-24 left-6 w-[350px] max-h-[500px] h-[calc(100vh-120px)] bg-white dark:bg-[#111111] rounded-2xl shadow-2xl border border-gray-200 dark:border-white/10 flex flex-col z-50 overflow-hidden"
+            className="fixed bottom-44 left-6 w-[350px] max-h-[500px] h-[calc(100vh-160px)] bg-white dark:bg-[#111111] rounded-2xl shadow-2xl border border-gray-200 dark:border-white/10 flex flex-col z-[110] overflow-hidden"
           >
             {/* Header */}
             <div className="p-4 bg-gradient-to-r from-neon-purple to-accent-blue text-white flex items-center justify-between">

@@ -21,28 +21,28 @@ export default function FloatingContact() {
   };
 
   return (
-    <div className="fixed bottom-24 right-6 z-50 flex flex-col items-end gap-4">
+    <div className="fixed bottom-28 left-6 z-[110] flex flex-col items-start gap-4">
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.8 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.8 }}
-            className="flex flex-col gap-3 items-end"
+            className="flex flex-col gap-3 items-start mb-2"
           >
             <button
               onClick={handleEmail}
               className="flex items-center gap-3 bg-blue-500 text-white px-4 py-3 rounded-full shadow-lg hover:bg-blue-600 transition-colors font-medium whitespace-nowrap"
             >
-              <span>{t('contact.sendEmail')}</span>
               <Mail className="w-5 h-5" />
+              <span>{t('contact.sendEmail')}</span>
             </button>
             <button
               onClick={handleWhatsApp}
               className="flex items-center gap-3 bg-green-500 text-white px-4 py-3 rounded-full shadow-lg hover:bg-green-600 transition-colors font-medium whitespace-nowrap"
             >
-              <span>{t('contact.chatWa')}</span>
               <MessageCircle className="w-5 h-5" />
+              <span>{t('contact.chatWa')}</span>
             </button>
           </motion.div>
         )}

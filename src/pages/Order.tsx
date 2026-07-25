@@ -4,6 +4,7 @@ import { useSearchParams, Link } from "react-router-dom";
 import { Upload, CheckCircle, Copy, Download, Maximize2, X, Image as ImageIcon } from "lucide-react";
 import { useCurrency } from "../context/CurrencyContext";
 import { useLanguage } from "../context/LanguageContext";
+import { clsx } from "clsx";
 
 export default function Order() {
   const { t } = useLanguage();
@@ -20,7 +21,8 @@ export default function Order() {
     phone: "",
     serviceId: searchParams.get("service") || "",
     planId: searchParams.get("plan") || "",
-    requirements: ""
+    requirements: "",
+    paymentMethod: "QRIS"
   });
   
   const [step, setStep] = useState(1);
@@ -90,10 +92,19 @@ export default function Order() {
     
     try {
       const totalIdr = calculateTotalIdr();
-      const res = await fetch("/api/orders", {
+      const totalUsd = calculateTotalUsd();
+      const endpoint = formData.paymentMethod === "PayPal" ? "/api/paypal/create-order" : "/api/orders";
+      
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, total: totalIdr, currency })
+        body: JSON.stringify({ 
+          ...formData, 
+          priceIdr: totalIdr,
+          priceUsd: totalUsd,
+          total: totalIdr, 
+          currency: formData.paymentMethod === "PayPal" ? "USD" : currency 
+        })
       });
       const data = await res.json();
       if (data.success) {
@@ -222,10 +233,40 @@ export default function Order() {
               <textarea required name="requirements" value={formData.requirements} onChange={handleChange} rows={4} className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 focus:border-neon-purple focus:ring-1 focus:ring-neon-purple outline-none transition-all" placeholder="Describe your website needs..."></textarea>
             </div>
 
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Metode Pembayaran</label>
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, paymentMethod: "QRIS" })}
+                  className={clsx(
+                    "p-4 rounded-xl border flex items-center justify-center gap-3 font-medium transition-all",
+                    formData.paymentMethod === "QRIS"
+                      ? "border-neon-purple bg-neon-purple/10 text-neon-purple"
+                      : "border-gray-200 dark:border-white/10 hover:border-gray-400"
+                  )}
+                >
+                  <span>📱</span> QRIS (IDR)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, paymentMethod: "PayPal" })}
+                  className={clsx(
+                    "p-4 rounded-xl border flex items-center justify-center gap-3 font-medium transition-all",
+                    formData.paymentMethod === "PayPal"
+                      ? "border-neon-purple bg-neon-purple/10 text-neon-purple"
+                      : "border-gray-200 dark:border-white/10 hover:border-gray-400"
+                  )}
+                >
+                  <span>🌐</span> PayPal (USD)
+                </button>
+              </div>
+            </div>
+
             {formData.serviceId && formData.planId && (
               <div className="p-4 rounded-xl bg-gray-50 dark:bg-white/5 flex justify-between items-center">
                 <span className="font-medium">Total Price:</span>
-                <span className="text-xl font-bold font-display text-neon-purple">{currency === 'USD' ? `$${calculateTotalUsd().toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}` : `Rp ${calculateTotalIdr().toLocaleString('id-ID')}`}</span>
+                <span className="text-xl font-bold font-display text-neon-purple">{formData.paymentMethod === "PayPal" ? `$${calculateTotalUsd().toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}` : (currency === 'USD' ? `$${calculateTotalUsd().toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}` : `Rp ${calculateTotalIdr().toLocaleString('id-ID')}`)}</span>
               </div>
             )}
 
@@ -236,7 +277,77 @@ export default function Order() {
         )}
 
         {step === 2 && (
-          <motion.form initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} onSubmit={handleSubmitPayment} className="space-y-8">
+          formData.paymentMethod === "PayPal" ? (
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 font-medium text-sm mb-6">
+                  Complete payment in {formatTime(countdown)}
+                </div>
+                
+                <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-[#003087] flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+                  P
+                </div>
+                
+                <h2 className="text-3xl font-bold mb-2">${calculateTotalUsd().toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})} USD</h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-2">Email Tujuan PayPal:</p>
+                <div className="inline-block px-4 py-2 rounded-xl bg-gray-100 dark:bg-white/5 font-mono text-sm font-bold text-neon-purple mb-6">
+                  muhammadabdikapratama7@gmail.com
+                </div>
+
+                <div className="max-w-md mx-auto mb-8">
+                  <a
+                    href={`https://www.paypal.com/paypalme/muhammadabdikapratama7/${calculateTotalUsd().toFixed(2)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={async () => {
+                      try {
+                        await fetch("/api/paypal/capture-order", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ orderId: order?.id, paypalOrderId: order?.paypalOrderId })
+                        });
+                      } catch {}
+                    }}
+                    className="w-full py-4 px-6 rounded-xl bg-[#0070BA] hover:bg-[#003087] text-white font-bold text-lg flex items-center justify-center gap-3 shadow-xl transition-all hover:scale-[1.02]"
+                  >
+                    <span>Bayar dengan PayPal</span>
+                  </a>
+                  <p className="text-xs text-gray-500 mt-2">Tombol di atas otomatis membuka halaman pembayaran PayPal ke muhammadabdikapratama7@gmail.com</p>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-200 dark:border-white/10 pt-6">
+                <h3 className="text-base font-bold mb-2 text-center">Atau Upload Bukti Pembayaran PayPal</h3>
+                <p className="text-xs text-gray-500 text-center mb-4">Jika webhook PayPal belum dikonfigurasi, silakan upload bukti transfer.</p>
+                
+                <form onSubmit={handleSubmitPayment} className="max-w-md mx-auto space-y-4">
+                  <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
+                  {!proofPreview ? (
+                    <div 
+                      onClick={() => fileInputRef.current?.click()}
+                      className="border-2 border-dashed border-gray-300 dark:border-white/20 rounded-2xl p-6 text-center hover:border-neon-purple transition-colors cursor-pointer group"
+                    >
+                      <Upload className="w-6 h-6 mx-auto mb-2 text-gray-400 group-hover:text-neon-purple transition-colors" />
+                      <p className="text-sm text-gray-500">Upload Bukti Transfer PayPal</p>
+                    </div>
+                  ) : (
+                    <div className="relative rounded-2xl border border-gray-200 dark:border-white/10 overflow-hidden bg-black/5">
+                      <img src={proofPreview} alt="Proof Preview" className="w-full h-40 object-cover" />
+                      <button type="button" onClick={() => { setProofFile(null); setProofPreview(null); }} className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white hover:bg-black/80 transition-colors">
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                  {proofError && <p className="text-red-500 text-sm">{proofError}</p>}
+                  
+                  <button type="submit" disabled={isSubmitting || !proofPreview} className="w-full py-3 rounded-xl bg-black dark:bg-white text-white dark:text-black font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
+                    {isSubmitting ? "Processing..." : "Konfirmasi Pembayaran PayPal"}
+                  </button>
+                </form>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.form initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} onSubmit={handleSubmitPayment} className="space-y-8">
             <div className="text-center">
               <div className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 font-medium text-sm mb-6">
                 Complete payment in {formatTime(countdown)}
@@ -244,11 +355,11 @@ export default function Order() {
               {order?.currency === 'USD' ? (
                 <>
                   <h2 className="text-xl font-medium text-gray-500 mb-1">Total in USD: ${calculateTotalUsd().toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</h2>
-                  <p className="text-sm text-gray-500 mb-4">Exchange Rate: $1 = Rp {exchangeRate.toLocaleString('id-ID')}</p>
-                  <h2 className="text-3xl font-bold mb-2">To Pay: Rp {order?.total?.toLocaleString('id-ID')}</h2>
+                  <p className="text-sm text-gray-500 mb-4">Exchange Rate: $1 = Rp {((exchangeRate as number) || 15500).toLocaleString('id-ID')}</p>
+                  <h2 className="text-3xl font-bold mb-2">To Pay: Rp {((order as any)?.total || 0).toLocaleString('id-ID')}</h2>
                 </>
               ) : (
-                <h2 className="text-3xl font-bold mb-2">Total: Rp {order?.total?.toLocaleString('id-ID')}</h2>
+                <h2 className="text-3xl font-bold mb-2">Total: Rp {((order as any)?.total || 0).toLocaleString('id-ID')}</h2>
               )}
               <button 
                 type="button" 
@@ -301,6 +412,7 @@ export default function Order() {
               </button>
             </div>
           </motion.form>
+          )
         )}
 
         {step === 3 && (

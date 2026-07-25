@@ -16,11 +16,15 @@ import Support from "./pages/Support";
 import Contact from "./pages/Contact";
 import FreeQuote from "./pages/FreeQuote";
 import Consultation from "./pages/Consultation";
+import Account from "./pages/Account";
 import { CurrencyProvider, useCurrency } from "./context/CurrencyContext";
 import { LanguageProvider, useLanguage } from "./context/LanguageContext";
+import { ThemeProvider, useTheme } from "./context/ThemeContext";
+import ThemeSwitch from "./components/ThemeSwitch";
 import LiveChat from "./components/LiveChat";
 import FloatingContact from "./components/FloatingContact";
 import Notifications from "./components/Notifications";
+import BottomNav from "./components/BottomNav";
 
 import SEO from "./components/SEO";
 
@@ -32,7 +36,7 @@ function ScrollToTop() {
   return null;
 }
 
-function Layout({ children, toggleTheme, isDark }: { children: React.ReactNode, toggleTheme: () => void, isDark: boolean }) {
+function Layout({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const { currency, setCurrency, usdEnabled, idrEnabled } = useCurrency();
@@ -45,7 +49,7 @@ function Layout({ children, toggleTheme, isDark }: { children: React.ReactNode, 
   return (
     <div className="min-h-screen flex flex-col font-sans">
       <SEO />
-      <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-white/70 dark:bg-[#050505]/70 border-b border-gray-200 dark:border-white/10 transition-colors duration-300">
+      <header className="sticky top-0 z-[20] w-full backdrop-blur-xl bg-white/70 dark:bg-[#050505]/70 border-b border-gray-200 dark:border-white/10 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-blue to-neon-purple flex items-center justify-center text-white font-bold text-xl font-display">P</div>
@@ -91,9 +95,7 @@ function Layout({ children, toggleTheme, isDark }: { children: React.ReactNode, 
                   </button>
                 )}
               </div>
-              <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                {isDark ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5" />}
-              </button>
+              <ThemeSwitch />
               <Link to="/order" className="px-5 py-2.5 rounded-full bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:scale-105 transition-transform">
                 {t('nav.orderNow')}
               </Link>
@@ -156,24 +158,24 @@ function Layout({ children, toggleTheme, isDark }: { children: React.ReactNode, 
                 )}
               </div>
 
-              <button onClick={toggleTheme} className="flex items-center gap-2 p-2 hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg text-left">
-                {isDark ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5" />}
-                {isDark ? "Light Mode" : "Dark Mode"}
-              </button>
+              <div className="p-2">
+                <ThemeSwitch className="w-full justify-center" />
+              </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <main className="flex-grow">
+      <main className="flex-grow pb-32">
         {children}
       </main>
 
       <LiveChat />
       <FloatingContact />
       <Notifications />
+      <BottomNav />
 
-      <footer className="border-t border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#0a0a0a] py-16 mt-20">
+      <footer className="border-t border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#0a0a0a] py-16 mt-20 mb-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-2 mb-6">
@@ -200,7 +202,6 @@ function Layout({ children, toggleTheme, isDark }: { children: React.ReactNode, 
             <ul className="space-y-4 text-sm text-gray-600 dark:text-gray-400">
               <li><button onClick={() => window.open(`https://wa.me/6283894781688?text=${encodeURIComponent(lang === 'en' ? "Hello PixelForge Studio,\n\nI'm interested in your website development services.\n\nCould you provide information about your services, pricing, and estimated completion time?\n\nThank you." : "Halo PixelForge Studio,\n\nSaya tertarik menggunakan jasa pembuatan website.\n\nMohon informasi mengenai layanan, harga, dan estimasi pengerjaan.\n\nTerima kasih.")}`, '_blank')} className="hover:text-neon-purple transition-colors flex items-center gap-2"><MessageCircle className="w-4 h-4" /> WhatsApp</button></li>
               <li><button onClick={() => window.open(`mailto:muhammadabdikapratama7@gmail.com?subject=${encodeURIComponent("Website Development Inquiry")}&body=${encodeURIComponent("Hello PixelForge Studio,\n\nI'm interested in ordering a website.\n\nPlease contact me regarding pricing and project details.\n\nThank you.")}`)} className="hover:text-neon-purple transition-colors flex items-center gap-2"><Mail className="w-4 h-4" /> Email</button></li>
-              <li><Link to="/admin" className="hover:text-neon-purple transition-colors mt-4 inline-block">Admin Login</Link></li>
             </ul>
           </div>
         </div>
@@ -213,48 +214,41 @@ function Layout({ children, toggleTheme, isDark }: { children: React.ReactNode, 
 }
 
 export default function App() {
-  const [isDark, setIsDark] = useState(true); // Default to Dark Mode
-
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDark]);
-
-  const toggleTheme = () => setIsDark(!isDark);
-
   return (
-    <CurrencyProvider>
-      <LanguageProvider>
-        <BrowserRouter>
-          <ScrollToTop />
-          <Layout toggleTheme={toggleTheme} isDark={isDark}>
-            <AnimatePresence mode="wait">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/services" element={<Services />} />
-                <Route path="/portfolio" element={<Portfolio />} />
-                <Route path="/pricing" element={<Pricing />} />
-                <Route path="/order" element={<Order />} />
-                <Route path="/admin" element={<AdminLogin />} />
-                <Route path="/setup" element={<AdminSetup />} />
-                <Route path="/admin/dashboard/*" element={<AdminDashboard />} />
-                <Route path="/my-orders" element={<MyOrders />} />
-                <Route path="/support" element={<Support />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/quote" element={<FreeQuote />} />
-                <Route path="/consult" element={<Consultation />} />
-                {/* Fallback routes for requested pages that point to home for now to prevent 404s */}
-                <Route path="/blog" element={<Home />} />
-                <Route path="/faq" element={<Home />} />
-                <Route path="/testimonials" element={<Home />} />
-              </Routes>
-            </AnimatePresence>
-          </Layout>
-        </BrowserRouter>
-      </LanguageProvider>
-    </CurrencyProvider>
+    <ThemeProvider>
+      <CurrencyProvider>
+        <LanguageProvider>
+          <BrowserRouter>
+            <ScrollToTop />
+            <Layout>
+              <AnimatePresence mode="wait">
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/services" element={<Services />} />
+                  <Route path="/portfolio" element={<Portfolio />} />
+                  <Route path="/pricing" element={<Pricing />} />
+                  <Route path="/order" element={<Order />} />
+                  <Route path="/admin" element={<AdminLogin />} />
+                  <Route path="/setup" element={<AdminSetup />} />
+                  <Route path="/admin/dashboard/*" element={<AdminDashboard />} />
+                  <Route path="/my-orders" element={<MyOrders />} />
+                  <Route path="/history" element={<MyOrders />} />
+                  <Route path="/support" element={<Support />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/quote" element={<FreeQuote />} />
+                  <Route path="/consult" element={<Consultation />} />
+                   <Route path="/account" element={<Account />} />
+                  {/* Fallback routes for requested pages that point to home for now to prevent 404s */}
+                  <Route path="/blog" element={<Home />} />
+                  <Route path="/faq" element={<Home />} />
+                  <Route path="/testimonials" element={<Home />} />
+                </Routes>
+              </AnimatePresence>
+            </Layout>
+          </BrowserRouter>
+        </LanguageProvider>
+      </CurrencyProvider>
+    </ThemeProvider>
   );
 }
+
