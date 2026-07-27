@@ -1,4 +1,5 @@
-import { Router } from "express";
+import express, { Router } from "express";
+import cookieParser from "cookie-parser";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { GoogleGenAI } from "@google/genai";
@@ -1094,4 +1095,10 @@ router.get("/admin/paypal-payments", async (req, res) => {
   }
 });
 
-export default router;
+const app = express();
+app.use(express.json({ limit: "10mb" }));
+app.use(cookieParser());
+app.use("/", router);
+
+export default app;
+export { router };
